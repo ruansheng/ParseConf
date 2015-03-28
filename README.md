@@ -1,6 +1,5 @@
 #ParseConf
 C language parse config file
----
 ##Examples
 ```
 #include <stdio.h>
