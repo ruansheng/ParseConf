@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define MAX_LINE_SIZE 1024
 
@@ -12,6 +13,17 @@ struct Line {
 typedef struct Line NODE;
 
 NODE *Lines;
+
+char* join(char *s1, char *s2)  {
+    char *result = malloc(strlen(s1)+strlen(s2)+1);//+1 for the zero-terminator
+    //in real code you would check for errors in malloc here
+    if (result == NULL) exit (1);
+
+    strcpy(result, s1);
+    strcat(result, s2);
+
+    return result;
+}
 
 NODE * ParseConf(char *filePath){
 	NODE *head;
@@ -30,6 +42,15 @@ NODE * ParseConf(char *filePath){
 	head=NULL;
 	one_line = (char*)malloc( MAX_LINE_SIZE * sizeof(char) );
 	while( fgets(one_line, MAX_LINE_SIZE, fin) != NULL ){
+		//处理切割k v
+//		char *key=(char *)malloc(sizeof(char));
+//		char *value=(char *)malloc(sizeof(char));
+		char *tmp=one_line;
+		while(*tmp!='\n'){
+			printf("%c\n",*tmp);
+			++tmp;
+		}
+//		printf("%s\n",key);
 		if(head==NULL){
 			p1->key=one_line;
 			head=p1;
@@ -51,7 +72,7 @@ int main(){
 
 	Lines=ParseConf(filePath);
 	while(Lines!=NULL){
-		printf("%s",Lines->key);
+//		printf("%s",Lines->key);
 		Lines=Lines->next;
 	}
 
