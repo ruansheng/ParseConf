@@ -2,26 +2,27 @@
 #include <stdlib.h>
 #include <string.h>
 
+//link max size
 #define MAX_LINE_SIZE 1024
 
-struct Line {
+//type
+struct ConfLine {
 	char *key;
 	char *value;
-	struct Line *next;
+	struct ConfLine *next;
 };
 
-typedef struct Line NODE;
+//define type
+typedef struct ConfLine ConfNODE;
 
-NODE *Lines;
+ConfNODE *Lines;
 
 /**
  * 过滤#注释
  * @return 返回过滤后的字符串
  */
-char * filterSharp(char *str,int len){
-	char tmp[len];
-	memset(tmp,0,len);
-	int i=0;
+int str_split(char *str,char *key,char *value){
+	int flag=0;
 	while(*str!='\0'){
 		if(*str=='#'||*str=='\n'){
 			break;
@@ -29,51 +30,66 @@ char * filterSharp(char *str,int len){
 			str++;
 			continue;
 		}else{
-			tmp[i]=*str;
-			i++;
-			str++;
+			if(*str=='='){
+				flag=1;
+				str++;
+				continue;
+			}
+			if(flag==0){
+				*key++=*str++;
+			}else if(flag==1){
+				*value++=*str++;
+			}
 		}
 	}
-	return tmp;
+	*key='\0';
+	*value='\0';
+
+	return 0;
 }
 
 /**
- * 查找某个字符在字符串中的位置
- * @return index
- * index=0 没有找到
- * index>0 找到,并且位置是index-1
+ *遍历显示Linked
  */
-int getIndex(char *str,char aim){
-	int index;
-	int i=1;
-	while(*str!='\0'){
-		if(*str==aim){
-			index=i;
-			break;
-		}else{
-			i++;
-		}
-		str++;
+int displayKeyValue(ConfNODE *head){
+	ConfNODE *p=head;
+	while(p!=NULL){
+		printf("key:%s	value:%s\n",p->key,p->value);
+		p=p->next;
 	}
-	return index;
+	return 0;
 }
 
+/**
+ * 查找字符内容
+ * @return char*
+ */
+char* getValue(ConfNODE *head,char *key){
+	ConfNODE *p=head;
+	int flag=1;
+	while(p!=NULL){
 
-char* join(char *s1, char *s2)  {
-    char *result = malloc(strlen(s1)+strlen(s2)+1);//+1 for the zero-terminator
-    //in real code you would check for errors in malloc here
-    if (result == NULL) exit (1);
-
-    strcpy(result, s1);
-    strcat(result, s2);
-
-    return result;
+		if(strcmp(p->key,key)==0){
+			flag=0;
+			break;
+		}
+		p=p->next;
+	}
+	if(flag==0){
+		return p->value;
+	}else{
+		return NULL;
+	}
 }
 
-NODE * ParseConf(char *filePath){
-	NODE *head;
-	NODE *p1,*p2;
-	p1=p2=(NODE*)malloc(sizeof(NODE));
+/**
+ * 解析配置文件
+ * return ConfNODE *
+ */
+ConfNODE * ParseConf(char *filePath){
+	ConfNODE *head;
+	ConfNODE *p1,*p2;
+	p1=p2=(ConfNODE*)malloc(sizeof(ConfNODE));
 	if(p1==NULL||p2==NULL){
 		return NULL;
 	}
@@ -87,38 +103,27 @@ NODE * ParseConf(char *filePath){
 	head=NULL;
 	one_line = (char*)malloc( MAX_LINE_SIZE * sizeof(char) );
 	while( fgets(one_line, MAX_LINE_SIZE, fin) != NULL ){
-		char *key=(char *)malloc(sizeof(char));
 		//获取字符串长度
 		int len=strlen(one_line);
-		//过滤#
-		char *tmp=filterSharp(one_line,len);
-//		printf("%s\n",tmp);
-		//找到=位置
-		int index=getIndex(one_line,'=');
+		char *key=(char *)malloc(sizeof(char));
+		char *value=(char *)malloc(sizeof(char));
+
+		int flag=str_split(one_line,key,value);
 
 		if(head==NULL){
-			p1->key=one_line;
+			p1->key=key;
+			p1->value=value;
 			head=p1;
 		}else{
-			p2->key=one_line;
+			p2->key=key;
+			p2->value=value;
 			p1->next=p2;
 			p1=p2;
 		}
-		p2=(NODE*)malloc(sizeof(NODE));
+		p2=(ConfNODE*)malloc(sizeof(ConfNODE));
 		one_line = (char*)malloc( MAX_LINE_SIZE * sizeof(char) );
 	}
 	p1->next=NULL;
 	fclose(fin);
 	return head;
-}
-
-int main(){
-	char *filePath="./config.conf";
-
-	Lines=ParseConf(filePath);
-	while(Lines!=NULL){
-		printf("%s",Lines->key);
-		Lines=Lines->next;
-	}
-
 }

@@ -1,8 +1,8 @@
-ParseConf:ParseConf.o
-	gcc -o ParseConf ParseConf.o
-ParseConf.o:ParseConf.c
-	gcc -o ParseConf.o -c ParseConf.c
+test:test.o
+	gcc -o test test.o
+test.o:test.c
+	gcc -o test.o -c test.c
 clean:
-	rm ParseConf ParseConf.o
+	rm test test.o
 
 
