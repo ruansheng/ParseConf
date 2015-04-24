@@ -2,18 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-//link max size
+/* link max size */
 #define MAX_LINE_SIZE 1024
 
 //type
-struct ConfLine {
-	char *key;
-	char *value;
+typedef struct ConfLine {
+	char key[40];
+	char value[40];
 	struct ConfLine *next;
-};
-
-//define type
-typedef struct ConfLine ConfNODE;
+} ConfNODE;
 
 ConfNODE *Lines;
 
@@ -110,16 +107,19 @@ ConfNODE * ParseConf(char *filePath){
 
 		int flag=str_split(one_line,key,value);
 
-		if(head==NULL){
-			p1->key=key;
-			p1->value=value;
-			head=p1;
-		}else{
-			p2->key=key;
-			p2->value=value;
-			p1->next=p2;
-			p1=p2;
+		if(strlen(key)>=1&&strlen(value)>=1){
+			if(head==NULL){
+				strcpy(p1->key,key);
+				strcpy(p1->value,value);
+				head=p1;
+			}else{
+				strcpy(p2->key,key);
+				strcpy(p2->value,value);
+				p1->next=p2;
+				p1=p2;
+			}
 		}
+
 		p2=(ConfNODE*)malloc(sizeof(ConfNODE));
 		one_line = (char*)malloc( MAX_LINE_SIZE * sizeof(char) );
 	}
@@ -127,3 +127,15 @@ ConfNODE * ParseConf(char *filePath){
 	fclose(fin);
 	return head;
 }
+
+/**
+ *释放内存
+ */
+void freeConf(ConfNODE *head){
+	ConfNODE *p=head;
+	while(p!=NULL){
+		free(p);
+		p=p->next;
+	}
+}
+

@@ -17,6 +17,7 @@ int main(){
 	displayKeyValue(Lines);
 	char *value=getValue(Lines,"b");
 	printf("%s\n",value);
+	freeConf(Lines);
 //	while(Lines!=NULL){
 //		printf("%s=%s\n",Lines->key,Lines->value);
 //		Lines=Lines->next;
